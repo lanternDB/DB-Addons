@@ -1,0 +1,100 @@
+/*Define awaiting_duel_response*/
+var awaiting_duel_response = false;
+ 
+/*Add chat, red, blue buttons*/
+$('#duel').append('<div id="duel" class="chat_btn tab_btn selected" style="pointer-events: none; top: 192px; width: 59px; height: 22px; background-color: #666666; border-top-left-radius: 5px; border-top-right-radius: 5px; text-align: center; font-size: 16px; font-weight: bold; cursor: pointer; color: white; line-height: 24px; left: 842px;">Chat</div>');
+$('#duel').append('<div id="duel" class="red_btn tab_btn" style="pointer-events: auto; top: 192px; width: 60px; height: 22px; background-color: #666666; border-top-left-radius: 5px; border-top-right-radius: 5px; text-align: center; font-size: 16px; font-weight: bold; cursor: pointer; color: white; line-height: 24px; left: 903px;">Red</div>');
+$('#duel').append('<div id="duel" class="blue_btn tab_btn" style="pointer-events: auto; top: 192px; width: 60px; height: 22px; background-color: #666666; border-top-left-radius: 5px; border-top-right-radius: 5px; text-align: center; font-size: 16px; font-weight: bold; cursor: pointer; color: white; line-height: 24px; left: 964px;">Blue</div>');
+$("#duel .chat_btn").hide();
+$("#duel .red_btn").hide();
+$("#duel .blue_btn").hide();
+ 
+/*Add textbox for history*/
+$('#duel').append('<div class="cout_txt2 textarea scrollpane selectable os-host os-theme-dark os-host-overflow os-host-overflow-x os-host-resize-disabled os-host-transition" tabindex="0" style="transform-style: flat; left: 843px; top: 216px; width: 170.6px; height: 197px;"><div class="os-size-auto-observer" style="height: calc(100% + 1px); float: left;"><div class="os-resize-observer observed"></div></div><div class="os-content-glue" style="margin: -4px; width: 168px; height: 219px;"></div><div class="os-padding" style="top: 4px; right: 4px; bottom: 4px; left: 4px;"><div class="os-viewport os-viewport-native-scrollbars-invisible unselectable" style="right: 0px; bottom: 0px;"><div class="os-content selectable os-textarea" style="height: 100%; width: 100%;"></div></div></div><div class="os-scrollbar os-scrollbar-horizontal os-scrollbar-unusable"><div class="os-scrollbar-track" style="background-color: rgba(255, 255, 255, 0.3);"><div class="os-scrollbar-handle" style="width: 99.4152%; transform: translate(0px, 0px); opacity: 0;"></div></div></div><div class="os-scrollbar os-scrollbar-vertical os-scrollbar-unusable"><div class="os-scrollbar-track" style="background-color: rgba(255, 255, 255, 0.3);"><div class="os-scrollbar-handle" style="height: 100%; transform: translate(0px, 0px); opacity: 0;"></div></div></div></div>');
+$("#duel .cout_txt2").hide();
+ 
+/*Functionality for chat, red, blue buttons*/
+function showChat(e) {
+    duelTabChange(e);
+    $("#duel .cout_txt").show();
+    $("#duel .cout_txt2").hide();
+}
+ 
+function showRed(e) {
+    duelTabChange(e);
+    $('#duel .cout_txt2').html("");
+    awaiting_duel_response = true
+    getBanStatus(player1.username);
+  $("#duel .cout_txt2").show();
+  $("#duel .cout_txt").hide();
+}
+ 
+function showBlue(e) {
+    duelTabChange(e);
+    $('#duel .cout_txt2').html("");
+    awaiting_duel_response = true
+    getBanStatus(player2.username);
+    $("#duel .cout_txt2").show();
+    $("#duel .cout_txt").hide();
+}
+ 
+function duelTabChange(e) {
+    $('#duel .tab_btn').removeClass("selected");
+    $('#duel .tab_btn').css("pointer-events", "auto");
+    $(e.currentTarget).addClass("selected");
+    $(e.currentTarget).css("pointer-events", "none");
+}
+ 
+$('#duel .chat_btn').click(showChat);
+$('#duel .red_btn').click(showRed);
+$('#duel .blue_btn').click(showBlue);
+ 
+/*Edit banStatusResponse function*/
+function banStatusResponse(data) {
+    hideDim();
+    if (awaiting_response) {
+        $('#calls .status_txt').text("Status: " + data.status);
+        setText($('#calls .status_txt'));
+        $('#calls .strikes_txt').text("Strikes: " + data.strikes);
+        $('#calls .result_txt').html(arrayToNotes(data.notes));
+        awaiting_response = false;
+        return;
+    } else if (awaiting_duel_response) {
+        $('#duel .cout_txt2').html(arrayToNotes(data.notes));
+        awaiting_duel_response = false;    
+        return;
+    }
+    $('#ban_status .ban_note_txt').html(arrayToNotes(data.notes));
+    $('#ban_status .strikes_txt').text(data.strikes);
+    $('#ban_status .status_txt').text(data.status);
+    setText($('#ban_status .status_txt'));
+}
+ 
+function initAdmin(){
+    console.log('initAdmin');
+    $('#duel .cin_txt').show();
+    $('#duel .cin_txt').val("");
+    $('#duel .cin_txt').focus();
+    $('#duel .html_cb').checked(false);
+    if (html) {
+        $('#duel .html_cb').show();
+    }
+    $('#cancel_duel_btn').show();
+    $('#host_loss_btn').show();
+    $('#opponent_loss_btn').show();
+    resetDuelButtons();
+ 
+  /*Show buttons and textbox*/
+  $("#duel .chat_btn").show();
+  $("#duel .red_btn").show();
+  $("#duel .blue_btn").show();
+ 
+  /*Clear leftover history on join*/
+  $('#duel .cout_txt2').html("");
+ 
+  /*Edit duel chat -- this shoudln't have any unintended side effects -- initAdmin will override the size of the textbox*/
+  $('#duel .cout_txt').attr('style', 'transform-style: flat; left: 843px; top: 216px; !important; width: 170.6px; height: 197px; !important;');
+ 
+  /*Edit the refresh button*/
+  $('#duel .refresh_btn').attr('style', 'top: 218px; !important;');
+}
